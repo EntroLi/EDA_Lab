@@ -1,7 +1,6 @@
 import os
 import shutil
-
-import os
+import json
 
 root_path = "."  # Root directory path
 
@@ -68,5 +67,95 @@ def folder_delete(result_path):
 
     print(f"Found {count} folders here.")
 
+def folder_eval(folder_path):
+    adp_list = []
+    with open(os.path.join(folder_path, 'invalid_summary.txt'), 'w') as invalid_summary_file:
+        for data_dir in os.listdir(folder_path):
+            result_json_path = os.path.join(folder_path, data_dir, 'result.json')
+            if not os.path.exists(result_json_path):
+                continue
+            with open(result_json_path, 'r') as f:
+                result_json = json.load(f)
+
+            adp = result_json['area'] * result_json['delay']
+            adp_list.append((adp, data_dir))
+
+        adp_list.sort()  # 按照 ADP 值排序
+
+        for adp, data_dir in adp_list:
+            invalid_summary_file.write(f'ADP: {adp:16.4f}        in  Dir: {data_dir}\n')
+
+    adp_list = []
+    with open(os.path.join(folder_path, 'valid_summary.txt'), 'w') as valid_summary_file:
+        for data_dir in os.listdir(folder_path):
+            result_json_path = os.path.join(folder_path, data_dir, 'result.json')
+            if not os.path.exists(result_json_path):
+                continue
+            with open(result_json_path, 'r') as f:
+                result_json = json.load(f)
+            if result_json['drv'] != 0:
+                continue
+
+            adp = result_json['area'] * result_json['delay']
+            adp_list.append((adp, data_dir))
+        
+        adp_list.sort()  # 按照 ADP 值排序
+
+        if not adp_list:
+            valid_summary_file.write("No valid results found in this folder.")
+        else:
+            for adp, data_dir in adp_list:
+                valid_summary_file.write(f'ADP: {adp:16.4f}        in  Dir: {data_dir}\n')
+
 for result_folder in results_folders:
     folder_delete(result_folder)
+    folder_eval(result_folder)
+
+def merge_invalid_summaries(root_folder):
+    adp_entries = []
+
+    # 读取每个文件夹中的 invalid summary 文件，提取 ADP 值和目录名称
+    for folder_name in os.listdir(root_folder):
+        if os.path.isdir(os.path.join(root_folder, folder_name)):
+            invalid_summary_path = os.path.join(root_folder, folder_name, 'invalid_summary.txt')
+            if os.path.exists(invalid_summary_path):
+                with open(invalid_summary_path, 'r') as invalid_summary_file:
+                    for line in invalid_summary_file:
+                        if line.startswith('ADP:'):
+                            adp_value = float(line.split()[1])
+                            directory_name = line.split()[-1]
+                            adp_entries.append((adp_value, directory_name, folder_name))
+
+    # 按照 ADP 值排序
+    adp_entries.sort()
+
+    # 写入到合并文件中
+    with open(os.path.join(root_folder, 'merged_invalid_summary.txt'), 'w') as merged_file:
+        for adp_value, directory_name, source_folder in adp_entries:
+            merged_file.write(f'ADP: {adp_value:16.4f}    Source: {source_folder}    in  Dir: {directory_name}        \n')
+
+def merge_valid_summaries(root_folder):
+    adp_entries = []
+
+    # 读取每个文件夹中的 valid summary 文件，提取 ADP 值和目录名称
+    for folder_name in os.listdir(root_folder):
+        if os.path.isdir(os.path.join(root_folder, folder_name)):
+            valid_summary_path = os.path.join(root_folder, folder_name, 'valid_summary.txt')
+            if os.path.exists(valid_summary_path):
+                with open(valid_summary_path, 'r') as valid_summary_file:
+                    for line in valid_summary_file:
+                        if line.startswith('ADP:'):
+                            adp_value = float(line.split()[1])
+                            directory_name = line.split()[-1]
+                            adp_entries.append((adp_value, directory_name, folder_name))
+
+    # 按照 ADP 值排序
+    adp_entries.sort()
+
+    # 写入到合并文件中
+    with open(os.path.join(root_folder, 'merged_valid_summary.txt'), 'w') as merged_file:
+        for adp_value, directory_name, source_folder in adp_entries:
+            merged_file.write(f'ADP: {adp_value:16.4f}    Source: {source_folder}    in  Dir: {directory_name}        \n')
+
+merge_invalid_summaries(root_path)
+merge_valid_summaries(root_path)
