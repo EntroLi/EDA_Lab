@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import matplotlib.pyplot as plt
 
 root_path = "."  # Root directory path
 
@@ -133,6 +134,23 @@ def merge_invalid_summaries(root_folder):
     with open(os.path.join(root_folder, 'merged_invalid_summary.txt'), 'w') as merged_file:
         for adp_value, directory_name, source_folder in adp_entries:
             merged_file.write(f'ADP: {adp_value:16.4f}    Source: {source_folder}    in  Dir: {directory_name}        \n')
+    
+    #Plot Scatter
+    # 提取数据
+    directory_names = [entry[2] for entry in adp_entries]
+    adp_values = [entry[0] for entry in adp_entries]
+
+    # 绘制散点图
+    plt.figure(figsize=(12, 8))
+    plt.scatter(directory_names, adp_values, color='blue')
+    plt.xlabel('Directory Name')
+    plt.ylabel('ADP Value')
+    plt.title('Scatter Plot of ADP Values by Directory Name')
+    plt.xticks(rotation=20)  # 使横坐标标签斜着显示，以免重叠
+    plt.grid(True)
+    # 保存图片
+    plt.savefig(os.path.join(root_path, 'adp_scatter_plot.png'))
+    plt.show()
 
 def merge_valid_summaries(root_folder):
     adp_entries = []

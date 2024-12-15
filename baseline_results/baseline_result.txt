@@ -1,0 +1,22 @@
+Here are all 99 testcases:
+Min Delay: 443.5
+Max Delay: 932.1
+Avg Delay: 677.961616161616
+
+Min Area: 2687.364864
+Max Area: 13925.758464
+Avg Area: 5443.545390545456
+
+Min Drv: 0
+Max Drv: 146
+Avg Drv: 11.555555555555555
+
+Min Adp: 1305852.6025728001
+Max Adp: 6500544.0509952
+Avg Adp: 3475061.0494533814
+
+Here are 27 clean testcases:
+Min Adp: 2032143.6225023998
+Max Adp: 4988346.052607999
+Avg Adp: 3441825.7062144005
+
