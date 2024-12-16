@@ -68,6 +68,9 @@ def folder_delete(result_path):
 
     print(f"Found {count} folders here.")
 
+def check_condition(entry):
+    return entry[2] != "pre_results" and entry[2] != "baseline_results"
+
 def folder_eval(folder_path):
     adp_list = []
     with open(os.path.join(folder_path, 'invalid_summary.txt'), 'w') as invalid_summary_file:
@@ -137,15 +140,15 @@ def merge_invalid_summaries(root_folder):
     
     #Plot Scatter
     # 提取数据
-    directory_names = [entry[2] for entry in adp_entries]
-    adp_values = [entry[0] for entry in adp_entries]
+    directory_names = [entry[2] for entry in adp_entries if check_condition(entry)]
+    adp_values = [entry[0] for entry in adp_entries if check_condition(entry)]
 
     # 绘制散点图
     plt.figure(figsize=(12, 8))
     plt.scatter(directory_names, adp_values, color='blue')
     plt.xlabel('Directory Name')
     plt.ylabel('ADP Value')
-    plt.title('Scatter Plot of ADP Values by Directory Name')
+    plt.title('Scatter Plot of ADP Values')
     plt.xticks(rotation=20)  # 使横坐标标签斜着显示，以免重叠
     plt.grid(True)
     # 保存图片

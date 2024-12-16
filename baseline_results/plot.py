@@ -38,12 +38,12 @@ for folder in folders:
 plt.figure(figsize=(10, 6))
 for i in range(len(delays)):
     if drvs[i] == 0:
-        plt.scatter(delays[i], areas[i], color='red', label='drv = 0')
+        plt.scatter(delays[i], areas[i], color='blue', label='drv = 0')
     else:
-        plt.scatter(delays[i], areas[i], color='blue', label='drv != 0')
-plt.xlabel('Delays')
-plt.ylabel('Areas')
-plt.title('Scatter Plot of Delays vs Areas')
+        plt.scatter(delays[i], areas[i], color='red', label='drv != 0')
+plt.xlabel('Delay')
+plt.ylabel('Area')
+plt.title('Scatter Plot for Baseline Results')
 plt.grid(True)
-plt.savefig('scatter_plot.png')
+plt.savefig('baseline_scatter_plot.png')
 plt.show()
