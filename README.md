@@ -28,7 +28,7 @@
 
 对以上99个案例绘制Area-Delay散点图，其中红色代表存在物理违例，蓝色代表不存在物理违例：
 
-![baseline_scatter_plot](./baseline_results/baseline_scatter_plot.png)
+![baseline_scatter_plot](./pca_results/baseline_results/baseline_scatter_plot.png)
 
 在后续评估中，我们对于允许违例的情况，将选择**3475601**作为ADP的Baseline；对于不允许违例的情况，将选择**3441826**作为ADP的Baseline。
 
@@ -59,6 +59,32 @@ def get_Try1_adder(input_bit: int) -> PPAdderConfig:
             node_mat[m, n] = 1
     return PPAdderConfig(input_bit, required_mat=node_mat)
 ~~~
+## CT设计
+
+这里单独考虑compressor tree的优化对于结果的影响，因此统一选择Brentkung加法器，同时控制Tool参数保持不变。
+
+首先分别选择Wallace压缩树和Dadda压缩树作为初始的压缩树，不进行任何调整的情况下分别得到默认的结果:
+
+Wallace `ADP=2944948.6089215996`, Dadda `ADP=2707877.3630975997`
+
+采用随机调整的策略，即每次调整随机选择一列执行随机一项操作（包括增加一个2:2压缩器、减少一个2:2压缩器、替换一个2:2压缩器为3:2压缩器、替换一个3:2压缩器为2:2压缩器）。再将压缩器分配到对应层级，同样再进行随机调整。统计随机调整得到的压缩树对最终的结果影响如下：
+
+以Wallace压缩树作为初始压缩树时，运行了20次，其中有10次得到了正向优化的结果，其中最好的`ADP=2774499.8916096003`。
+
+以Dadda压缩树作为初始压缩树时，运行了150次，其中有30次得到了正向优化的结果，其中最好的`ADP=2613479.8086143997`。
+
+考虑到初始压缩树每一列压缩器数量的分布，调整了随机选择更新列的策略，给每一列赋予一个权重`Column_weight=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 0]`，在调整压缩器和分配层级时均以该权重随机选择一列。统计加权调整得到的压缩树对最终的结果影响如下：
+
+以Wallace压缩树作为初始压缩树时，运行了19次，其中有10次得到了正向优化的结果，其中最好的`ADP=2846598.8640768`。
+
+以Dadda压缩树作为初始压缩树时，运行了20次，其中有8次得到了正向优化的结果，其中最好的`ADP=2611749.95136`。
+
+| Default CT | Default | Random  |   Weight    |
+| :--------: | :-----: | :-----: | :---------: |
+|  Wallace   | 2944948 | 2774499 |   2846598   |
+|   Dadda    | 2707877 | 2613479 | **2611749** |
+
+对比发现，加权调整的思路能大大增加有效调整的数量和正向优化的概率，尤其是对Dadda初始压缩树来说。
 
 ## 手动调节优化
 
@@ -154,3 +180,5 @@ ADP:      725507.9290    Source: koggestone_dadda_results    in  Dir: f7fef9d999
 > Base:   ADP=3475601
 >
 > Opt:   ADP=682162	**(19.6%Base  shows  5.10X reduction)**
+
+以上的所有测试案例数据均已开源至https://github.com/EntroLi/EDA_Lab。
