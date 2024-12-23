@@ -28,7 +28,7 @@
 
 对以上99个案例绘制Area-Delay散点图，其中红色代表存在物理违例，蓝色代表不存在物理违例：
 
-![baseline_scatter_plot](./pca_results/baseline_results/baseline_scatter_plot.png)
+![baseline_scatter_plot](./cpa_results/baseline_results/baseline_scatter_plot.png)
 
 在后续评估中，我们对于允许违例的情况，将选择**3475601**作为ADP的Baseline；对于不允许违例的情况，将选择**3441826**作为ADP的Baseline。
 
